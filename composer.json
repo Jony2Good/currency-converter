@@ -1,0 +1,21 @@
+{
+  "name": "converter/app",
+  "description": "test_work",
+  "authors": [
+    {
+      "name": "jony2good"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "App\\": "app"
+    },
+    "files": [
+      "routes/web.php"
+    ]
+  },
+   "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.19",
+    "phpstan/phpstan": "^1.3"
+  }
+}
