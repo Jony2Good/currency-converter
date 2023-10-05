@@ -6,13 +6,25 @@ use App\System\Interface\DocumentParserInterface;
 
 class DocumentJsonParser implements DocumentParserInterface
 {
+    /**
+     * @var array<string>
+     */
     public array $storage = [];
 
+    /**
+     * @param mixed $file
+     * @return mixed
+     */
     public function getData(mixed $file): mixed
     {
         return json_decode($file, true);
     }
 
+    /**
+     * @param mixed $file
+     * @param string $innerCharCode
+     * @return array<string>
+     */
     public function readData(mixed $file, string $innerCharCode): array
     {
         $data = $this->getData($file);
@@ -27,4 +39,3 @@ class DocumentJsonParser implements DocumentParserInterface
         return $this->storage;
     }
 }
-

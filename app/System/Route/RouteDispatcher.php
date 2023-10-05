@@ -4,10 +4,22 @@ namespace App\System\Route;
 
 class RouteDispatcher
 {
+    /**
+     * @var string
+     */
     private string $requestUri = '/';
 
+    /**
+     * @var array<string>
+     */
     private array $paramMap = [];
+    /**
+     * @var array<string>
+     */
     private array $paramRequestMap = [];
+    /**
+     * @var RouteConfiguration
+     */
     private RouteConfiguration $routeConfiguration;
 
     /**
@@ -16,9 +28,12 @@ class RouteDispatcher
     public function __construct(RouteConfiguration $routeConfiguration)
     {
 
-       $this->routeConfiguration = $routeConfiguration;
+        $this->routeConfiguration = $routeConfiguration;
     }
 
+    /**
+     * @return void
+     */
     public function process(): void
     {
         $this->saveRequestUri();
@@ -27,6 +42,9 @@ class RouteDispatcher
         $this->run();
     }
 
+    /**
+     * @return void
+     */
     private function saveRequestUri(): void
     {
         if ($_SERVER['REQUEST_URI'] !== '/') {
@@ -35,11 +53,18 @@ class RouteDispatcher
         }
     }
 
-    private function clean($str): string
+    /**
+     * @param string $str
+     * @return string
+     */
+    private function clean(string $str): string
     {
         return preg_replace('/(^\/)|(\/$)/', '', $str);
     }
 
+    /**
+     * @return void
+     */
     private function setParamMap(): void
     {
         $routeArray = explode('/', $this->routeConfiguration->route); //строка, указанная в команде Route файла web.php, разбитая на массив ключей и параметров
@@ -51,28 +76,37 @@ class RouteDispatcher
         }
     }
 
+    /**
+     * @return void
+     */
     private function makeRegexRequest(): void
     {
-        $requestUriArray = explode('/', $this->requestUri); //текущий URI, который разбивается на массив
+        $requestUriArray = explode('/', $this->requestUri);
 
-        foreach ($this->paramMap as $key => $value) { //если в массиве с текущим URI есть значение с
-            if (!isset($requestUriArray[$key])) { // ключом из массива с параметрами
+        foreach ($this->paramMap as $key => $value) {
+            if (!isset($requestUriArray[$key])) {
                 return;
             } else {
                 $this->paramRequestMap[$value] = $requestUriArray[$key];
-                $requestUriArray[$key] = '{.*}';//переделываем в регулярное выражение
+                $requestUriArray[$key] = '{.*}';
             }
         }
 
-        $this->requestUri = implode('/', $requestUriArray); //текущий URI cсбирается в строку
+        $this->requestUri = implode('/', $requestUriArray);
         $this->prepareRegexRequest();
     }
 
+    /**
+     * @return void
+     */
     private function prepareRegexRequest(): void
     {
         $this->requestUri = str_replace('/', '\/', $this->requestUri);
     }
 
+    /**
+     * @return void
+     */
     private function run(): void
     {
         if (preg_match("/$this->requestUri/", $this->routeConfiguration->route)) {
@@ -80,11 +114,14 @@ class RouteDispatcher
         }
     }
 
+    /**
+     * @return void
+     */
     private function render(): void
     {
         $class = $this->routeConfiguration->controller;
         $method = $this->routeConfiguration->action;
-        print_r((new $class)->$method(...array_values($this->paramRequestMap)));
+        print_r((new $class())->$method(...array_values($this->paramRequestMap)));
         die();
     }
 

@@ -1,12 +1,16 @@
 <?php
+
 namespace App\System\Route;
 
 class Route
 {
+    /**
+     * @var array<string>
+     */
     private static array $routesPost = [];
 
-       /**
-     * @return array
+    /**
+     * @return array<string>
      */
     public static function getRoutesPost(): array
     {
@@ -15,7 +19,7 @@ class Route
 
     /**
      * @param string $route
-     * @param array $controller
+     * @param array<string> $controller
      * @return RouteConfiguration
      */
     public static function post(string $route, array $controller): RouteConfiguration
@@ -25,8 +29,8 @@ class Route
 
     /**
      * @param string $route
-     * @param array $controller
-     * @param $arrayRoutes
+     * @param array<string> $controller
+     * @param array<string> $arrayRoutes
      * @return RouteConfiguration
      */
     private static function register(string $route, array $controller, &$arrayRoutes): RouteConfiguration

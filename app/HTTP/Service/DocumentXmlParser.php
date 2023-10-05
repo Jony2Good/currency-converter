@@ -6,8 +6,15 @@ use App\System\Interface\DocumentParserInterface;
 
 class DocumentXmlParser implements DocumentParserInterface
 {
+    /**
+     * @var array<string>
+     */
     public array $storage = [];
 
+    /**
+     * @param mixed $file
+     * @return \SimpleXMLElement|false
+     */
     public function getData(mixed $file): \SimpleXMLElement|false
     {
         return simplexml_load_string($file);
@@ -16,7 +23,7 @@ class DocumentXmlParser implements DocumentParserInterface
     /**
      * @param mixed $file
      * @param string $innerCharCode
-     * @return array
+     * @return array<string>
      */
     public function readData(mixed $file, string $innerCharCode): array
     {
