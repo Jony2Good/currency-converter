@@ -6,34 +6,54 @@ use App\System\Interface\DocumentParserInterface;
 
 class DocumentXmlParser implements DocumentParserInterface
 {
+    use ConverterTrait;
+
     /**
      * @var array<string>
      */
-    public array $storage = [];
+    protected array $storage = [];
+    /**
+     * @var array<string>
+     */
+    protected array $storageFrom = [];
+
+    protected \SimpleXMLElement|false $xmLData;
 
     /**
-     * @param mixed $file
+     * @param string $data
      * @return \SimpleXMLElement|false
      */
-    public function getData(mixed $file): \SimpleXMLElement|false
+    public function checkData(string $data): \SimpleXMLElement|false
     {
-        return simplexml_load_string($file);
+        $this->xmLData = simplexml_load_string($data);
+        return $this->xmLData;
     }
 
-    /**
-     * @param mixed $file
-     * @param string $innerCharCode
-     * @return array<string>
-     */
-    public function readData(mixed $file, string $innerCharCode): array
-    {
-        $data = $this->getData($file);
 
-        foreach ($data as $el) {
-            if (strval($el->CharCode) === $innerCharCode) {
-                return $this->storage[] = [strval($el->Value), strval($el->Nominal)];
+    public function readData(string $charCode)
+    {
+        $storage = [];
+        foreach ($this->xmLData as $el) {
+          if (strval($el->CharCode) == $charCode) {
+               $storage[] = [strval($el->Value), strval($el->Nominal)];
             }
         }
-        return $this->storage;
+        return $storage;
+    }
+
+    public function convert(string $from, string $to, string $amount)
+    {
+        $exchangeFrom = $this->readData($from);
+        $exchangeTo = $this->readData($to);
+
+        if (empty($exchangeFrom) || empty($exchangeTo)) {
+            return 'Data is empty';
+        }
+
+        $myResult = ((float)$exchangeFrom[0][0] / (float)$exchangeFrom[0][1]) * (float)$amount;
+        $totalCash = $myResult / ($exchangeTo[0][0] / $exchangeTo[0][1]);
+
+        return json_encode(array('result' => $totalCash . ' ' . $to));
+
     }
 }

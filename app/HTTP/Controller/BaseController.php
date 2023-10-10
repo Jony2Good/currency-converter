@@ -9,53 +9,33 @@ use App\HTTP\Service\ParseData;
 class BaseController
 {
     public function __construct(
-        protected DocumentXmlParser $xmlData = new DocumentXmlParser(),
+        protected DocumentXmlParser  $xmlData = new DocumentXmlParser(),
         protected DocumentJsonParser $jsonData = new DocumentJsonParser()
-    ) {
+    )
+    {
 
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function read(): string
+    public function read(): string|null
     {
         $country = $_POST['country'] ?? '';
         $amount = $_POST['amount'] ?? '';
         $from = strtoupper($_POST['from']) ?? '';
         $to = strtoupper($_POST['to']) ?? '';
 
-        if ($_POST['from'] === $_POST['to']) {
-            echo json_encode(array('message' => "Error with exchange amount"));
-            http_response_code(404);
-            die();
-        }
-
-        if(empty($country)) {
-            $defaultData = json_decode(ParseData::parseDefault($to, $from, $amount), true);
-            return json_encode(array('result' => $defaultData['result'] . ' '. $defaultData['query']['to']));
-        }
 
         $data = ParseData::read($country);
 
-        if ($this->xmlData->getData($data)) {
-            return $this->convert($data, $this->xmlData, $from, $to, $amount);
+        if ($this->xmlData->checkData($data)) {
+            return $this->xmlData->convert($from, $to, $amount);
         }
 
-        if ($this->jsonData->getData($data)) {
-            return $this->convert($data, $this->jsonData, $from, $to, $amount);
-        }
         return json_encode(array('message' => "Error with data"));
     }
 
-    protected function convert(mixed $data, object $obj, string $from, string $to, string $amount): false|string
-    {
-        $exchangeFrom = $obj->readData($data, $from);
-        $exchangeTo = $obj->readData($data, $to);
 
-        $myResult = (int)$amount * ($exchangeFrom[0] / $exchangeFrom[1]);
-        $totalCash = round($myResult / ($exchangeTo[0] / $exchangeTo[1]), 4);
 
-        return json_encode(array('result' => $totalCash . ' ' . $to));
-    }
 }
